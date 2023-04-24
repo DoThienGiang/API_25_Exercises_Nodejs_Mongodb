@@ -149,23 +149,28 @@ const cau10 = async () => {
   WHERE MaMH = ‘CSDL’ AND DiemThi>=8  
 */
 const cau11 = async () => {
-  const results = await SinhVien.aggregate([
+  const results = await KetQua.aggregate([
     {
       $lookup: {
-        from: KetQua.collection.name,
-        localField: 'maKQ',
-        foreignField: 'id',
-        as: 'KetQua',
+        from: 'monhocs',
+        localField: 'maMH',
+        foreignField: '_id',
+        as: 'MonHoc',
       },
     },
     {
       $replaceRoot: {
-        newRoot: { $mergeObjects: [{ $arrayElemAt: ['$KetQua', 0] }, '$$ROOT'] },
+        newRoot: { $mergeObjects: [{ $arrayElemAt: ['$MonHoc', 0] }, '$$ROOT'] },
       },
     },
     {
+      $project: {
+        MonHoc: 0
+      }
+    },
+    {
       $match: {
-        "MonHoc.tenMH": "Lập trình JavaScript 1"
+        tenMH:'Lập trình JavaScript 1'
       },
     },
     {
@@ -174,9 +179,27 @@ const cau11 = async () => {
       }
     },
     {
+      $lookup: {
+        from: 'sinhviens',
+        localField: 'maSV',
+        foreignField: '_id',
+        as: 'sv',
+      },
+    },
+    {
+      $replaceRoot: {
+        newRoot: { $mergeObjects: [{ $arrayElemAt: ['$sv', 0] }, '$$ROOT'] },
+      },
+    },
+    {
+      $project: {
+        sv: 0
+      }
+    },
+    {
       $project: { 
-        id: 1, hoTen: 1, nu:1, ngaySinh:1, maLop: 1, hocBong: 1, 
-        tinh: 1,diemThi: 1
+        _id: 1, hoTen: 1, nu:1, ngaySinh:1,
+tinh: 1,diemThi: 1
       },
     },
   ]);
